@@ -60,3 +60,15 @@ For example,
 ```
 ./app/pccclient send pcc_server_ip pcc_server_port Vivace Hybrid threshold
 ```
+
+## Modifications
+To run the server type:
+
+```
+PCC_LOG_FILENAME="server" ./app/pccserver recv pcc_server_port
+```
+
+To run the client type:
+```
+PCC_LOG_FILENAME="client" ./app/pccclient send pcc_server_ip pcc_server_port Vivace
+```
