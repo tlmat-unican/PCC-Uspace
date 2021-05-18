@@ -265,6 +265,7 @@ struct CPerfMon {
   int byteAvailSndBuf;
   // available UDT receiver buffer size
   int byteAvailRcvBuf;
+
 };
 
 ////////////////////////////////////////////////////////////////////////////////

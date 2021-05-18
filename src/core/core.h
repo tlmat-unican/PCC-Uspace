@@ -724,6 +724,8 @@ class CUDT {
   std::set<int> m_sPollID;
   void addEPoll(const int eid);
   void removeEPoll(const int eid);
+
+  std::ofstream m_ackLog; 
 };
 
 

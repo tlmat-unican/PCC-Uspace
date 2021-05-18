@@ -2,6 +2,8 @@
 #include "test_util.h"
 
 #include <iostream>
+#include <chrono>
+#include <iomanip>
 #ifndef WIN32
 #include <cstdlib>
 #include <cstring>
@@ -167,7 +169,17 @@ void* recvdata(void* usocket)
 #else
 DWORD WINAPI recvdata(LPVOID usocket)
 #endif
-{
+{ 
+  int recvCtr = 1;
+  std::ofstream m_recvLog; 
+  if(const char* env_p = std::getenv("PCC_LOG_FILENAME")) {
+    std::string aux(env_p);
+    m_recvLog.open(aux + "_recv.txt", std::ofstream::out);
+  } else {
+    std::cerr << "PCC_LOG_FILENAME env var not set " << std::endl;
+    std::exit(-1);
+  }
+
   UDTSOCKET recver = *(UDTSOCKET*)usocket;
   delete (UDTSOCKET*)usocket;
   pthread_create(new pthread_t, NULL, recv_monitor, &recver);
@@ -187,7 +199,10 @@ DWORD WINAPI recvdata(LPVOID usocket)
         cout << "recv:" << UDT::getlasterror().getErrorMessage() << endl;
         break;
       }
-
+      auto now = std::chrono::system_clock::now();
+      auto duration = now.time_since_epoch();
+      auto seconds = std::chrono::duration_cast<std::chrono::microseconds>(duration);
+      m_recvLog << std::fixed << double(seconds.count())/1e6 << ", " << recvCtr++ << "\n";
       rsize += rs;
     }
 

@@ -50,6 +50,7 @@ written by
 #include <sstream>
 #include <unordered_map>
 
+
 #ifndef WIN32
 #include <algorithm>
 #include <arpa/inet.h>
@@ -99,7 +100,6 @@ const int32_t CMsgNo::m_iMaxMsgNo = 0x1FFFFFFF;
 const int CUDT::m_iVersion = 4;
 const int CUDT::m_iSYNInterval = 1000000;
 const int CUDT::m_iSelfClockInterval = 64;
-
 
 CUDT::CUDT() {
   m_pSndBuffer = NULL;
@@ -162,6 +162,14 @@ CUDT::CUDT() {
   remove( "/home/yossi/timeout_times.txt" );
   for (int i = 0; i < MAX_MONITOR; i++) {
     state[i] = 0;
+  }
+
+  if(const char* env_p = std::getenv("PCC_LOG_FILENAME")) {
+    std::string aux(env_p);
+    m_ackLog.open(aux + "_ack.txt", std::ofstream::out);
+  } else {
+    std::cerr << "PCC_LOG_FILENAME env var not set " << std::endl;
+    std::exit(-1);
   }
 }
 
@@ -248,6 +256,10 @@ CUDT::~CUDT() {
   delete m_pRNode;
   delete pcc_sender;
   delete packet_tracker_;
+
+  if ( m_ackLog.is_open()){
+    m_ackLog.close();
+  }
 }
 
 void CUDT::setOpt(UDTOpt optName, const void* optval, const int&) {
@@ -1615,6 +1627,7 @@ void CUDT::ProcessAck(CPacket& ctrlpkt) {
   PacketState old_state = packet_tracker_->GetPacketState(seq_no);
   packet_tracker_->OnPacketAck(seq_no, msg_no);
   uint64_t rtt_us = packet_tracker_->GetPacketRtt(seq_no, msg_no);
+  m_ackLog << (rtt_us*1000) << "\n";
   m_iRTT = (7.0 * m_iRTT + (double)rtt_us) / 8.0;
   m_iRTTVar = (m_iRTTVar * 7.0 + abs((double)rtt_us - m_iRTT) * 1.0) / 8.0;
   int32_t size = packet_tracker_->GetPacketSize(seq_no);
