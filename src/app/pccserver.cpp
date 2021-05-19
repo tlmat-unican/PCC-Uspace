@@ -174,7 +174,7 @@ DWORD WINAPI recvdata(LPVOID usocket)
   std::ofstream m_recvLog; 
   if(const char* env_p = std::getenv("PCC_LOG_FILENAME")) {
     std::string aux(env_p);
-    m_recvLog.open(aux + "_recv.txt", std::ofstream::out);
+    m_recvLog.open(aux + "_recv.txt", std::ofstream::out | std::ofstream::trunc);
   } else {
     std::cerr << "PCC_LOG_FILENAME env var not set " << std::endl;
     std::exit(-1);
